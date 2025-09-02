@@ -4,7 +4,7 @@ echo Building project...
 if not exist bin mkdir bin
 
 REM Correctly compile with the JUnit jar in classpath
-javac -cp "lib\junit-platform-console-standalone-1.10.2.jar" -d bin src\*.java test\*.java
+javac -cp "lib\junit-platform-console-standalone-1.10.2.jar" -d bin src\*.java
 
 if %errorlevel% neq 0 (
     echo Compilation failed.

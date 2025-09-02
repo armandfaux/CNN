@@ -1,4 +1,4 @@
-class ConnectedLayer {
+class DenseLayer extends Layer {
     private int size;
     private int previousLayerSize;
 
@@ -8,7 +8,7 @@ class ConnectedLayer {
     private double[] lastOutput;
     private double[] lastInput;
 
-    public ConnectedLayer(int size, int previousLayerSize) {
+    public DenseLayer(int size, int previousLayerSize) {
         this.size = size;
         this.previousLayerSize = previousLayerSize;
 
@@ -17,9 +17,11 @@ class ConnectedLayer {
 
         this.lastOutput = new double[size];
         this.lastInput = new double[previousLayerSize];
+
+        init();
     }
 
-    public void initialize(String weightOption) { 
+    public void init() { 
         // Set biases to random values from 0 to 1
         for (int i = 0; i < this.size; i++) {
             biases[i] = Math.random();
