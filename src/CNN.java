@@ -1,3 +1,4 @@
+import java.lang.ProcessBuilder.Redirect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +24,13 @@ public class CNN {
 
         double[][][] output = input;
         for (Layer layer : layers) {
+            if (layer.type == Layer.Type.DENSE && output[0][0].length != ((DenseLayer) layer).previousLayerSize) {
+                if (Config.verbose()) {
+                    System.out.println("[WARNING] Adjusting Dense layer input size from " + ((DenseLayer) layer).previousLayerSize + " to " + output[0][0].length);
+                }
+                ((DenseLayer) layer).init(output[0][0].length);
+            }
+
             output = layer.forward(output);
         }
         return output;

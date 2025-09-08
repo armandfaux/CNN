@@ -15,6 +15,7 @@ public class PoolLayer extends Layer {
     }
 
     public double[][][] forward(double[][][] input) {
+        System.out.println("[POOL LAYER] initiating forward pass");
         int inputHeight = input[0].length;
         int inputWidth = input[0][0].length;
 

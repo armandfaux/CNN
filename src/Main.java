@@ -1,11 +1,12 @@
 public class Main {
     public static void main(String[] args) {
         // Example usage
-        ConvLayer convLayer = new ConvLayer(2, 3, 3);
+        ConvLayer convLayer = new ConvLayer(2, 2, 2);
         PoolLayer poolLayer = new PoolLayer(2, 2);
+        FlattenLayer flattenLayer = new FlattenLayer();
         DenseLayer denseLayer = new DenseLayer(10, 2);
+        Config.setVerbose(true);
 
-        // no random 10x10 input
         double[][][] input = new double[1][10][10];
         for (int i = 0; i < 10; i++) {
             for (int j = 0; j < 10; j++) {
@@ -17,6 +18,7 @@ public class Main {
         CNN network = new CNN();
         network.addLayer(convLayer);
         network.addLayer(poolLayer);
+        network.addLayer(flattenLayer);
         network.addLayer(denseLayer);
         // network.addLayer(denseLayer);
         // Add more layers as needed

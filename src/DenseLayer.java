@@ -1,29 +1,29 @@
 class DenseLayer extends Layer {
     private int size;
-    private int previousLayerSize;
+    public int previousLayerSize;
 
     private double[] biases;
     private double[][] weights;
 
-    private double[] lastOutput;
-    private double[] lastInput;
+    private double[][][] lastOutput;
+    private double[][][] lastInput;
 
     public DenseLayer(int size, int previousLayerSize) {
         this.size = size;
+        init(previousLayerSize);
+    }
+
+    public void init(int previousLayerSize) {
         this.previousLayerSize = previousLayerSize;
 
         this.biases = new double[size];
         this.weights = new double[size][previousLayerSize];
 
-        this.lastOutput = new double[size];
-        this.lastInput = new double[previousLayerSize];
+        this.lastOutput = new double[1][1][size];
+        this.lastInput = new double[1][1][previousLayerSize];
 
         this.type = Type.DENSE;
 
-        init();
-    }
-
-    public void init() { 
         // Set biases to random values from 0 to 1
         for (int i = 0; i < this.size; i++) {
             biases[i] = Math.random();
@@ -38,30 +38,40 @@ class DenseLayer extends Layer {
         }
     }
 
-    public double[] forward(double[] input) {
+    public double[][][] forward(double[][][] input) {
+        System.out.println("[Dense Layer] Initiating forward pass");
         // display();
 
-        if (input.length != this.previousLayerSize) {
+        if (input[0][0].length != this.previousLayerSize) {
             throw new IllegalArgumentException("Input size does not match the previous layer size.");
         }
 
         // (can also use the existing member lastOutput instead)
-        double[] output = new double[this.size];
+        double[][][] output = new double[1][1][this.size];
 
         for (int neuron = 0; neuron < this.weights.length; neuron++) {
             double sum_weighted_input = 0;
 
             // Sum of every input * corresponding weight
             for (int k = 0; k < this.previousLayerSize; k++) {
-                sum_weighted_input += input[k] * this.weights[neuron][k];
+                sum_weighted_input += input[0][0][k] * this.weights[neuron][k];
             }
 
             // Add bias and activation function
-            output[neuron] = Activation.sigmoid(sum_weighted_input + this.biases[neuron]);
+            output[0][0][neuron] = Activation.sigmoid(sum_weighted_input + this.biases[neuron]);
         }
 
         this.lastInput = input;
         this.lastOutput = output;
+
+        if (Config.verbose()) {
+            System.out.println("[Dense Layer] Output:");
+            for (double value : output[0][0]) {
+                System.out.printf("%.6f ", value);
+            }
+            System.out.println("\n====================");
+        }
+
         return output;
     }
 
@@ -71,12 +81,12 @@ class DenseLayer extends Layer {
         // For each neuron in this layer
         for (int neuron = 0; neuron < this.size; neuron++) {
             // Compute delta (error)
-            double derivative = Activation.derivativeSigmoid(this.lastOutput[neuron]);
+            double derivative = Activation.derivativeSigmoid(this.lastOutput[0][0][neuron]);
             double delta_i = delta[neuron] * derivative;
 
             for (int i = 0; i < this.previousLayerSize; i++) {
                 // Update weight using gradient descent
-                double gradient = delta_i * this.lastInput[i];
+                double gradient = delta_i * this.lastInput[0][0][i];
                 weights[neuron][i] -= learningRate * gradient;
 
                 // Accumulate delta to propagate to previous layer
@@ -90,7 +100,7 @@ class DenseLayer extends Layer {
         return newDelta;
     }
 
-    public double[] getLastOutput() {
+    public double[][][] getLastOutput() {
         return lastOutput;
     }
 

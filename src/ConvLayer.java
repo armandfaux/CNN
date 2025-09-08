@@ -1,7 +1,7 @@
 import java.util.Random;
 
 class ConvLayer extends Layer {
-    private int kernelNum;
+    public int kernelNum;
     private int kernelHeight;
     private int kernelWidth;
     private double[][][] kernels;
@@ -14,7 +14,6 @@ class ConvLayer extends Layer {
         this.type = Type.CONV;
 
         this.kernelNum = kernelNum;
-        System.out.println(kernelNum + " kernels");
         this.kernelWidth = kernelWidth;
         this.kernelHeight = kernelHeight;
         this.stride = 1;
@@ -40,24 +39,25 @@ class ConvLayer extends Layer {
     }
 
     public double[][][] forward(double[][][] input) {
-
         // print input
-        System.out.println("Input feature maps:");
-        for (double[][] featureMap : input) {
-            for (double[] row : featureMap) {
-                for (double value : row) {
-                    System.out.print(value + " ");
-                }
-                System.out.println();
-            }
-            System.out.println();
-        }
+        // for (double[][] featureMap : input) {
+        //     for (double[] row : featureMap) {
+        //         for (double value : row) {
+        //             System.out.print(value + " ");
+        //         }
+        //         System.out.println();
+        //     }
+        //     System.out.println();
+        // }
 
         int outputHeight = (input[0].length - this.kernelHeight + 2 * this.padding) / this.stride + 1;
         int outputWidth = (input[0][1].length - this.kernelWidth + 2 * this.padding) / this.stride + 1;
 
-        System.out.println("outputHeight = " + outputHeight);
-        System.out.println("outputWidth = " + outputWidth);
+        if (Config.verbose()) {
+            System.out.println("[Conv Layer] initiating forward pass");
+            System.out.println("outputHeight = " + outputHeight);
+            System.out.println("outputWidth = " + outputWidth);
+        }
 
         if (outputHeight < 1 || outputWidth < 1 || this.kernelNum < 1) {
             throw new IllegalArgumentException("Invalid output dimensions");
@@ -100,10 +100,25 @@ class ConvLayer extends Layer {
                 }
                 System.out.println();
             }
-            System.out.println();
+            System.out.println("*****************\n");
         }
 
         return output;
+    }
+
+    public void displayKernels() {
+        System.out.println("[Conv Layer] Kernels:");
+        for (int k = 0; k < this.kernelNum; k++) {
+            System.out.println("Kernel " + k + ":");
+            for (int y = 0; y < this.kernelHeight; y++) {
+                for (int x = 0; x < this.kernelWidth; x++) {
+                    System.out.print(String.format("%.3f", this.kernels[k][y][x]) + " ");
+                }
+                System.out.println();
+            }
+            System.out.println("Bias: " + String.format("%.3f", this.biases[k]));
+            System.out.println();
+        }
     }
 
     // Setters and getters for layer properties
