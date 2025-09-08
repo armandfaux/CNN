@@ -1,4 +1,12 @@
 public class Layer {
+    enum Type {
+        DENSE,
+        CONV,
+        POOLING,
+    }
+
+    protected Type type;
+
     public double[][][] forward(double[][][] input) {
         // This method should be overridden in subclasses
         throw new UnsupportedOperationException("Forward method not implemented in Layer class.");

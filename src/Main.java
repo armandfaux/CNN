@@ -17,6 +17,7 @@ public class Main {
         CNN network = new CNN();
         network.addLayer(convLayer);
         network.addLayer(poolLayer);
+        network.addLayer(denseLayer);
         // network.addLayer(denseLayer);
         // Add more layers as needed
 

@@ -18,6 +18,8 @@ class DenseLayer extends Layer {
         this.lastOutput = new double[size];
         this.lastInput = new double[previousLayerSize];
 
+        this.type = Type.DENSE;
+
         init();
     }
 

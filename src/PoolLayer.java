@@ -8,6 +8,7 @@ public class PoolLayer extends Layer {
     // private int padding;
 
     public PoolLayer(int poolHeight, int poolWidth) {
+        this.type = Type.POOLING;
         this.poolHeight = poolHeight;
         this.poolWidth = poolWidth;
         this.stride = 2;

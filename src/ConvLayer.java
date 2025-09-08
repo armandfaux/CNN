@@ -11,6 +11,8 @@ class ConvLayer extends Layer {
     private int padding;
 
     public ConvLayer(int kernelNum, int kernelHeight, int kernelWidth) {
+        this.type = Type.CONV;
+
         this.kernelNum = kernelNum;
         System.out.println(kernelNum + " kernels");
         this.kernelWidth = kernelWidth;
