@@ -115,10 +115,12 @@ class ConvLayer extends Layer {
 
     // To be implemented
     public double[][][] backward(double[][][] delta_O, double learningRate) {
+        // input tensor shape (chanels, height width)
         int c_in = this.input_tensor.length;
         int h_in = this.input_tensor[0].length;
         int w_in = this.input_tensor[0][0].length;
 
+        // output tensor shape (chanels, height width)
         int c_out = this.kernelNum;
         int h_out = this.output_height;
         int w_out = this.output_width;
@@ -148,8 +150,14 @@ class ConvLayer extends Layer {
         double[][][][] delta_F =  new double[c_out][c_in][h_out][w_out];
         double[] delta_B = new double[c_out];
 
-        // Apply derivative on delta_O
-        // To be implemented
+        // Apply derivative on delta_O, to obtain pre-activation gradient
+        for (int c = 0; c < c_out; c++) {
+            for (int h = 0; h < h_out; h++) {
+                for (int w = 0; w < w_out; w++) {
+                    delta_O[c][h][w] = Activation.reluDerivative(delta_O[c][h][w]);
+                }
+            }
+        }
 
         // Check initialisation values
         System.out.println("Delta_I initial values:");
