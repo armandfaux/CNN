@@ -28,6 +28,17 @@ public class Utils {
         return sum;
     }
 
+    // return a zero matrix of input shape
+    public static double[][] zeroMatrix(int rows, int cols) {
+        double[][] matrix = new double[rows][cols];
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                matrix[i][j] = 0.0;
+            }
+        }
+        return matrix;
+    }
+
     // Rework to input any D Tensor
     public static double[][]getSubMatrix(double[][] M, int[] shape, int[] padding) {
         // Check input shapes

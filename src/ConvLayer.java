@@ -146,11 +146,11 @@ class ConvLayer extends Layer {
         // delta_F[c_out][c_in][h_out][w_out]
         // delta_O(N)[c_out][h_out][w_out]
 
-        double[][][] delta_I = new double[c_in][h_in][w_in];
-        double[][][][] delta_F =  new double[c_out][c_in][h_out][w_out];
         double[] delta_B = new double[c_out];
+        double[][][] delta_I = new double[c_in][h_in][w_in];
+        double[][][][] delta_F =  new double[c_out][c_in][h_out][w_out]; // also called delta K in papers
 
-        // Apply derivative on delta_O, to obtain pre-activation gradient
+        // Apply derivative on delta_O, to obtain pre-activation gradient (delta Z)
         for (int c = 0; c < c_out; c++) {
             for (int h = 0; h < h_out; h++) {
                 for (int w = 0; w < w_out; w++) {
@@ -168,11 +168,38 @@ class ConvLayer extends Layer {
         }
         System.out.println("***************\n");
 
+
+        // Compute Delta I
+        // For each input channel
+        for (int c = 0; c < c_in; c++) {
+            delta_I[c] = Utils.zeroMatrix(h_in, w_in);
+
+            // For each filter
+            for (int k = 0; k < c_out; k++) {
+
+                // For every element of delta_O[k]
+                for (int h = 0; h < h_out; h++) {
+                    for (int w = 0; w < w_out; w++) {
+                        
+                        // Convolution of delta_O and rotated filter to compute delta_I
+                        for (int k_h = 0; k_h < this.kernelHeight; k_h++) {
+                            for (int k_w = 0; k_w < this.kernelWidth; k_w++) {
+                                // 180° rotation of filter is like browsing values from the end: [h][w] -> [h][0] -> [0][w] -> [0][0]
+                                delta_I[c][h + k_h][w + k_w] +=
+                                delta_O[k][h][w] * this.kernels[k][this.kernelHeight - k_h - 1][this.kernelWidth - k_w - 1];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Compute delta_B and delta_F (for each filter)
         for (int k = 0; k < c_out; k++) {
             // Compute bias gradient (sum of elements in dO[k])
             delta_B[k] = 0;
-            for (int h = 0; h < delta_O[k].length; h++) {
-                for (int w = 0; w < delta_O[k][0].length; w++) {
+            for (int h = 0; h < h_out; h++) {
+                for (int w = 0; w < w_out; w++) {
                     delta_B[k] += delta_O[k][h][w]; // adding the values of kernel's output delta (kernel, height, width)
                 }
             }
@@ -185,9 +212,8 @@ class ConvLayer extends Layer {
 
                     // X padding applied to input tensor
                     for (int x = 0; x < w_out; x++) {
-
+                        
                         double delta_F_sum = 0;
-
                         // Compute local gradient
                         for (int h = 0; h < kernelHeight; h++) {
                             for (int w = 0; w < kernelWidth; w++) {
