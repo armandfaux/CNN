@@ -1,3 +1,4 @@
+package cnn;
 public class Layer {
     enum Type {
         DENSE,

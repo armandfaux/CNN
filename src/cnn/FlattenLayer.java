@@ -1,3 +1,4 @@
+package cnn;
 public class FlattenLayer extends Layer {
     private int c_in;
     private int h_in;

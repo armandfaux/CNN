@@ -1,3 +1,4 @@
+package cnn;
 public class Utils {
     // public static double matrixDotProduct(double[][] A, double[][] B) {
     //     int rows = A.length;

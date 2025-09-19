@@ -1,3 +1,4 @@
+package cnn;
 public class PoolLayer extends Layer {
     private int poolHeight;
     private int poolWidth;

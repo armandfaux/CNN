@@ -1,4 +1,5 @@
-class DenseLayer extends Layer {
+package cnn;
+public class DenseLayer extends Layer {
     private int size;
     public int previousLayerSize;
 

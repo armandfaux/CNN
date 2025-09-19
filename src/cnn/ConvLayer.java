@@ -1,3 +1,4 @@
+package cnn;
 import java.util.Random;
 
 class ConvLayer extends Layer {

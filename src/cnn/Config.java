@@ -1,3 +1,4 @@
+package cnn;
 public final class Config {
     private static boolean verbose;
 
