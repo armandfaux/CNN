@@ -55,6 +55,13 @@ class ConvLayer extends Layer {
     }
 
     public double[][][] forward(double[][][] input) {
+        int c_in = this.kernelChannels;
+
+        if (input.length != this.kernelChannels) {
+            System.out.println("[WARNING] input channels do not match kernel channels");
+            c_in = Math.min(this.kernelChannels, this.input_tensor.length);
+        }
+
         // print input
         // for (double[][] featureMap : input) {
         //     for (double[] row : featureMap) {
@@ -89,7 +96,7 @@ class ConvLayer extends Layer {
         for (int k = 0; k < this.kernelNum; k++) {
 
             // Scan the input
-            for (int channel = 0; channel < input.length; channel++) {
+            for (int channel = 0; channel < c_in; channel++) {
                 for (int outputY = 0; outputY < h_out; outputY++) {
                     for (int outputX = 0; outputX < w_out; outputX++) {
                         double sum = 0.0;
@@ -129,15 +136,20 @@ class ConvLayer extends Layer {
         int h_out = this.output_height;
         int w_out = this.output_width;
 
-        // System.out.println("Shapes :");
-        // System.out.println("c_in =" + c_in);
-        // System.out.println("h_in =" + h_in);
-        // System.out.println("w_in =" + w_in);
-        // System.out.println("c_out =" + c_out);
-        // System.out.println("h_out =" + h_out);
-        // System.out.println("w_out =" + w_out);
+        // In case of mismatch between input channels and kernel channels
+        if (c_in != this.kernelChannels) {
+            System.out.println("[WARNING] input channels do not match kernel channels");
+        }
 
-        // System.out.println("\n************");
+        System.out.println("Shapes :");
+        System.out.println("c_in =" + c_in);
+        System.out.println("h_in =" + h_in);
+        System.out.println("w_in =" + w_in);
+        System.out.println("c_out =" + c_out);
+        System.out.println("h_out =" + h_out);
+        System.out.println("w_out =" + w_out);
+
+        System.out.println("\n************");
 
         // System.out.println("\nDelta_O:");
         // Utils.displayFeatureMaps(delta_O);
@@ -154,6 +166,10 @@ class ConvLayer extends Layer {
         double[][][][] delta_F =  new double[c_out][c_in][kernelHeight][kernelWidth]; // also called delta K in papers
 
         // Apply derivative on delta_O, to obtain pre-activation gradient (delta Z)
+
+        System.out.println("Delta_O before ReLU derivative:");
+        Utils.displayFeatureMaps(delta_O);
+
         for (int c = 0; c < c_out; c++) {
             for (int h = 0; h < h_out; h++) {
                 for (int w = 0; w < w_out; w++) {
@@ -161,16 +177,6 @@ class ConvLayer extends Layer {
                 }
             }
         }
-
-        // Check initialisation values
-        System.out.println("Delta_I initial values:");
-        for (double[][] i : delta_I) {
-            for (double [] j : i) {
-                System.out.println(j);
-            }
-        }
-        System.out.println("***************\n");
-
 
         // Compute Delta I
         // For each input channel

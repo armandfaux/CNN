@@ -25,9 +25,6 @@ public class Main {
         // double[][][] cnnOutput = network.forward(input);
     
         // CONVOLUTIONAL BACKWARD TEST
-        ConvLayer convLayer = new ConvLayer(3, 2, 2);
-
-
         double[][][] input = new double[2][3][3];
         input[0][0][0] = 1;
         input[0][0][1] = 2;
@@ -64,10 +61,20 @@ public class Main {
         gradient[2][0][1] = 0;
         gradient[2][1][0] = 1;
         gradient[2][1][1] = 3;
-    
+
+        Config.setVerbose(true);
+
+        ConvLayer convLayer1 = new ConvLayer(3, 2, 2, 2);
+        ConvLayer convLayer2 = new ConvLayer(2, 3, 2, 2);
+        FlattenLayer flattenLayer = new FlattenLayer();
+        DenseLayer denseLayer = new DenseLayer(10, 2);
+
         CNN network = new CNN();
-        network.addLayer(convLayer);
-        network.forward(input);
-        network.backward(gradient);
+
+        network.addLayer(convLayer1);
+        network.addLayer(convLayer2);
+        network.addLayer(flattenLayer);
+        network.addLayer(denseLayer);
+        network.backward(network.forward(input));
     }
 }

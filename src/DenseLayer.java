@@ -75,14 +75,17 @@ class DenseLayer extends Layer {
         return output;
     }
 
-    public double[] backward(double[] delta, double learningRate) {
-        double[] newDelta = new double[this.previousLayerSize];
+    public double[][][] backward(double[][][] delta, double learningRate) {
+        System.out.println("[Dense Layer] delta");
+        Utils.displayFeatureMaps(delta);
+
+        double[][][] newDelta = new double[1][1][this.previousLayerSize];
 
         // For each neuron in this layer
         for (int neuron = 0; neuron < this.size; neuron++) {
             // Compute delta (error)
             double derivative = Activation.derivativeSigmoid(this.lastOutput[0][0][neuron]);
-            double delta_i = delta[neuron] * derivative;
+            double delta_i = delta[0][0][neuron] * derivative;
 
             for (int i = 0; i < this.previousLayerSize; i++) {
                 // Update weight using gradient descent
@@ -90,12 +93,15 @@ class DenseLayer extends Layer {
                 weights[neuron][i] -= learningRate * gradient;
 
                 // Accumulate delta to propagate to previous layer
-                newDelta[i] += delta_i * weights[neuron][i];
+                newDelta[0][0][i] += delta_i * weights[neuron][i];
             }
 
             // Update bias
             biases[neuron] -= learningRate * delta_i;
         }
+
+        System.out.println("[Dense Layer] new delta");
+        Utils.displayFeatureMaps(newDelta);
 
         return newDelta;
     }
