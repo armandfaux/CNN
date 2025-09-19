@@ -2,10 +2,11 @@ import java.util.Random;
 
 class ConvLayer extends Layer {
     public int kernelNum;
+    private int kernelChannels;
     private int kernelHeight;
     private int kernelWidth;
 
-    public double[][][] kernels; // tmp public access for debugging
+    public double[][][][] kernels; // [k][channel][h][w]
     public double[] biases; // tmp public access for debugging
 
     private int output_height;
@@ -17,7 +18,7 @@ class ConvLayer extends Layer {
     // Cache for backpropagation
     public double[][][] input_tensor;
 
-    public ConvLayer(int kernelNum, int kernelHeight, int kernelWidth) {
+    public ConvLayer(int kernelNum, int channels, int kernelHeight, int kernelWidth) {
         this.type = Type.CONV;
 
         this.kernelNum = kernelNum;
@@ -32,7 +33,7 @@ class ConvLayer extends Layer {
         this.input_tensor = new double[0][0][0];
 
         // Each kernel (filter) is represented by a matrix of weights
-        this.kernels = new double[kernelNum][kernelHeight][kernelWidth];
+        this.kernels = new double[kernelNum][channels][kernelHeight][kernelWidth];
         this.biases = new double[kernelNum];
 
         init();
@@ -42,9 +43,12 @@ class ConvLayer extends Layer {
         Random rand = new Random();
         for (int k = 0; k < this.kernelNum; k++) {
             this.biases[k] = 0; // Initialize biases
-            for (int y = 0; y < this.kernelHeight; y++) {
-                for (int x = 0; x < this.kernelWidth; x++) {
-                    this.kernels[k][y][x] = rand.nextGaussian() * 0.01;
+
+            for (int c = 0; c < this.kernelChannels; c++) {
+                for (int y = 0; y < this.kernelHeight; y++) {
+                    for (int x = 0; x < this.kernelWidth; x++) {
+                        this.kernels[k][c][y][x] = rand.nextGaussian() * 0.01;
+                    }
                 }
             }
         }
@@ -95,7 +99,7 @@ class ConvLayer extends Layer {
                             for (int kx = 0; kx < this.kernelWidth; kx++) {
                                 int inputY = outputY * this.stride + ky - this.padding;
                                 int inputX = outputX * this.stride + kx - this.padding;
-                                sum += input[channel][inputY][inputX] * this.kernels[k][ky][kx];
+                                sum += input[channel][inputY][inputX] * this.kernels[k][channel][ky][kx];
                             }
                         }
 
@@ -176,7 +180,7 @@ class ConvLayer extends Layer {
             // For each filter
             for (int k = 0; k < c_out; k++) {
 
-                // For every element of delta_O[k]
+            // For every element of delta_O[k]
                 for (int h = 0; h < h_out; h++) {
                     for (int w = 0; w < w_out; w++) {
                         
@@ -185,7 +189,7 @@ class ConvLayer extends Layer {
                             for (int k_w = 0; k_w < this.kernelWidth; k_w++) {
                                 // 180° rotation of filter is like browsing values from the end: [h][w] -> [h][0] -> [0][w] -> [0][0]
                                 delta_I[c][h + k_h][w + k_w] +=
-                                delta_O[k][h][w] * this.kernels[k][this.kernelHeight - k_h - 1][this.kernelWidth - k_w - 1];
+                                delta_O[k][h][w] * this.kernels[k][c][this.kernelHeight - k_h - 1][this.kernelWidth - k_w - 1];
                             }
                         }
                     }
@@ -234,9 +238,11 @@ class ConvLayer extends Layer {
         for (int k = 0; k < this.kernelNum; k++) {
             biases[k] -= delta_B[k] * learningRate;
 
-            for (int y = 0; y < this.kernelHeight; y++) {
-                for (int x = 0; x < this.kernelWidth; x++) {
-                    this.kernels[k][y][x] -= delta_F[k][0][y][x] * learningRate;
+            for (int c = 0; c < this.kernelChannels; c++) {
+                for (int y = 0; y < this.kernelHeight; y++) {
+                    for (int x = 0; x < this.kernelWidth; x++) {
+                        this.kernels[k][c][y][x] -= delta_F[k][c][y][x] * learningRate;
+                    }
                 }
             }
         }
