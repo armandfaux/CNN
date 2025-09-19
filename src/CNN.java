@@ -39,7 +39,7 @@ public class CNN {
     public double[][][] backward(double[][][] gradient) {
         double[][][] output = gradient;
         for (int i = layers.size() - 1; i >= 0; i--) {
-            output = layers.get(i).backward(output);
+            output = layers.get(i).backward(output, 0.1);
         }
         return output;
     }
