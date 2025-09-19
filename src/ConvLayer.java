@@ -125,30 +125,29 @@ class ConvLayer extends Layer {
         int h_out = this.output_height;
         int w_out = this.output_width;
 
-        System.out.println("Shapes :");
-        System.out.println("c_in =" + c_in);
-        System.out.println("h_in =" + h_in);
-        System.out.println("w_in =" + w_in);
-        System.out.println("c_out =" + c_out);
-        System.out.println("h_out =" + h_out);
-        System.out.println("w_out =" + w_out);
+        // System.out.println("Shapes :");
+        // System.out.println("c_in =" + c_in);
+        // System.out.println("h_in =" + h_in);
+        // System.out.println("w_in =" + w_in);
+        // System.out.println("c_out =" + c_out);
+        // System.out.println("h_out =" + h_out);
+        // System.out.println("w_out =" + w_out);
 
-        System.out.println("\n************");
+        // System.out.println("\n************");
 
-        System.out.println("\nDelta_O:");
-        Utils.displayFeatureMaps(delta_O);
-        System.out.println("\ninput tensor:");
-        Utils.displayFeatureMaps(this.input_tensor);
+        // System.out.println("\nDelta_O:");
+        // Utils.displayFeatureMaps(delta_O);
+        // System.out.println("\ninput tensor:");
+        // Utils.displayFeatureMaps(this.input_tensor);
 
         // delta shapes (N = batch size) :
-        // delta_I(N)[c_in][h_in][w_in]
-        // delta_B[c_out]
-        // delta_F[c_out][c_in][h_out][w_out]
-        // delta_O(N)[c_out][h_out][w_out]
-
+        // delta_I  (N)[c_in][h_in][w_in]
+        // delta_B  [c_out]
+        // delta_F  [c_out][c_in][k_h][k_w]
+        // delta_O  (N)[c_out][h_out][w_out]
         double[] delta_B = new double[c_out];
         double[][][] delta_I = new double[c_in][h_in][w_in];
-        double[][][][] delta_F =  new double[c_out][c_in][h_out][w_out]; // also called delta K in papers
+        double[][][][] delta_F =  new double[c_out][c_in][kernelHeight][kernelWidth]; // also called delta K in papers
 
         // Apply derivative on delta_O, to obtain pre-activation gradient (delta Z)
         for (int c = 0; c < c_out; c++) {
@@ -208,16 +207,19 @@ class ConvLayer extends Layer {
             for (int c = 0; c < c_in; c++) {
 
                 // Y padding applied to input tensor
-                for (int y = 0; y < h_out; y++) {
+                for (int y = 0; y < this.kernelHeight; y++) {
 
                     // X padding applied to input tensor
-                    for (int x = 0; x < w_out; x++) {
+                    for (int x = 0; x < this.kernelWidth; x++) {
                         
                         double delta_F_sum = 0;
                         // Compute local gradient
-                        for (int h = 0; h < kernelHeight; h++) {
-                            for (int w = 0; w < kernelWidth; w++) {
-                                delta_F_sum += this.input_tensor[c][h + y][w + x] * delta_O[k][h][w];
+                        for (int h = 0; h < h_out; h++) {
+                            for (int w = 0; w < w_out; w++) {
+                                int in_h = h * this.stride + y - padding;
+                                int in_w = w * this.stride + x - padding;
+
+                                delta_F_sum += this.input_tensor[c][in_h][in_w] * delta_O[k][h][w];
                             }
                         }
                         delta_F[k][c][y][x] = delta_F_sum;
@@ -226,6 +228,17 @@ class ConvLayer extends Layer {
             }
 
             Utils.displayFeatureMaps(delta_F[k]);
+        }
+
+        // OPTIMISER STEP : TO BE SEPARATED FROM BACKWARD LATER
+        for (int k = 0; k < this.kernelNum; k++) {
+            biases[k] -= delta_B[k] * learningRate;
+
+            for (int y = 0; y < this.kernelHeight; y++) {
+                for (int x = 0; x < this.kernelWidth; x++) {
+                    this.kernels[k][y][x] -= delta_F[k][0][y][x] * learningRate;
+                }
+            }
         }
 
         return delta_I;
